@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter #process_pdf
 from pdfminer.pdfpage import PDFPage
@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 app = Flask(__name__)
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///pdf.db' #relative path for now
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/natalia/Projects/Parser/pdf.db' #reltive path for now
 db = SQLAlchemy(app)
 
 
@@ -23,12 +23,13 @@ class Pdf(db.Model):
         self.info = info
 
 
+
 db.create_all()
 
 
 # Extracting information from xml parsed by PDFMiner
 
-tree = ET.ElementTree(file='sample.xml')
+tree = ET.ElementTree(file='sam.xml')
 root = tree.getroot()
 
 textboxes = [] # list of textboxes
@@ -51,11 +52,26 @@ for i in range(len(textboxes)):
 
 db.session.commit()
 
+id = ''
+all_ids = db.session.query(Pdf.id)
+for i in all_ids:
+    id += str(i)
 
-# //display the data from database
+con = db.session.query(Pdf.content)
+pdf_text = ''
+for t in con:
+    pdf_text += str(t)
+print(pdf_text)
+
+pos = db.session.query(Pdf.info)
+text_position = ''
+for p in pos:
+    text_position += str(p)
+print(text_position)
+
 @app.route('/')
 def hello_world():
-    return str(parsed_pdf_text)
+    return render_template('index.html', id=id, pdf_text=pdf_text, text_position=text_position)
 
 
 if __name__ == '__main__':
