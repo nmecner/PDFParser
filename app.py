@@ -10,7 +10,6 @@ app = Flask(__name__)
 
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///pdf.db' #relative path for now
-
 db = SQLAlchemy(app)
 
 
@@ -24,35 +23,12 @@ class Pdf(db.Model):
         self.info = info
 
 
-def pdf_to_text(pdfname):
-
-    # PDFMiner boilerplate
-    rsrcmgr = PDFResourceManager()
-    sio = BytesIO()
-    codec = 'utf-8'
-    laparams = LAParams()
-    device = TextConverter(rsrcmgr, sio, codec=codec, laparams=laparams)
-    interpreter = PDFPageInterpreter(rsrcmgr, device)
-
-    # Extract text
-    fp = open(pdfname, 'rb')
-    for page in PDFPage.get_pages(fp):
-        interpreter.process_page(page)
-    fp.close()
-
-    # Get text from StringIO
-    text = sio.getvalue()
-
-    # Cleanup
-    device.close()
-    sio.close()
-
-    return text
+db.create_all()
 
 
 # Extracting information from xml parsed by PDFMiner
 
-tree = ET.ElementTree(file='sam.xml')
+tree = ET.ElementTree(file='sample.xml')
 root = tree.getroot()
 
 textboxes = [] # list of textboxes
@@ -69,16 +45,17 @@ for elm in root.getiterator(tag='textbox'):
         s += i.text
 
 
-# todo: insert parsed data into dbs
-
-# db.create_all()
-# db.session.add(currentpdf)
-# db.session.commit()
+for i in range(len(textboxes)):
+    db.session.add(Pdf((textboxes[i][1]['bbox']), contents[i]))
 
 
+db.session.commit()
+
+
+# //display the data from database
 @app.route('/')
 def hello_world():
-    return str(contents)
+    return str(parsed_pdf_text)
 
 
 if __name__ == '__main__':
