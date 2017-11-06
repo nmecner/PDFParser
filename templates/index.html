@@ -6,26 +6,22 @@
         <p class="lead"> This is the Flask app that shows the parsed PDF files in the form of text!</p>
         <div class="body-parser">
 
-            <table style="width:100%">
+            <table style="width:100%" border="1">
   <tr>
     <th>Id</th>
     <th>Text</th>
     <th>Position</th>
   </tr>
-  <tr>
-    <td>{{id}}</td>
-    <td>{{pdf_text}}</td>
-    <td>{{text_position}}</td>
-  </tr>
+
+      {% for score in results %}
+                <tr>
+      <td>{{score.id}}</td>
+      <td>{{score.info}}</td>
+      <td>{{score.content}}</td>
+    </tr>
+      {% endfor %}
 </table>
 
-
-
-
-
-
-            <span class="pdf-text">{{pdf_text}} </span>
-            <span class="pdf-text-position">{{text_position}}</span>
         </div>
     </div>
 {% endblock %}
